@@ -1,5 +1,5 @@
 States: q0 
-Input alphabet: (, )
+Input alphabet: ), (
 Stack alphabet: R, L, S
 Start state: q0
 Start stack element: S

@@ -61,6 +61,7 @@ class PushdownAutomaton:
     start_state: str
     start_stack_element: str
     rules: List[Rule]
+    grammar_correct: bool
 
     def output(self):
         result = 'States: '
@@ -94,6 +95,9 @@ class PushdownAutomaton:
         result += '}'
         return result
 
+    def is_grammar_correct(self):
+        return self.grammar_correct
+
 
 def build_automaton(gram: Grammar) -> PushdownAutomaton:
     states = ["q0"]
@@ -102,17 +106,25 @@ def build_automaton(gram: Grammar) -> PushdownAutomaton:
     stack_alphabet = gram.nonterminals
     start_state = states[0]
     start_stack_element = gram.start
+    grammar_correct = True
     for bind in gram.binds:
         for sequence in bind.description.sequences:
+
+            if not (isinstance(sequence.singles[0], Empty) or isinstance(sequence.singles[0], Terminal)):
+                grammar_correct = False
+
             left = Left(states[0], sequence.singles[0], bind.source)
             if len(sequence.singles) == 1:
                 right = Right(states[0], Sequence([Empty()]))
             else:
+                if len(get_terminals(sequence)) > 1:
+                    grammar_correct = False
+
                 right = Right(states[0], Sequence(sequence.singles[1::]))
 
             rules.append(Rule(left, right))
 
-    return PushdownAutomaton(states, input_alphabet, stack_alphabet, start_state, start_stack_element, rules)
+    return PushdownAutomaton(states, input_alphabet, stack_alphabet, start_state, start_stack_element, rules, grammar_correct)
 
 
 def main():
@@ -127,7 +139,10 @@ def main():
         parser = yacc.yacc(start="grammars")
         grammars = parser.parse("".join(f_input.readlines()))
         pushdown_automaton = build_automaton(grammars)
-        print(pushdown_automaton.output(), file=f_output)
+        if not pushdown_automaton.is_grammar_correct():
+            print("This grammar is not in Greibach normal form.", file=f_output)
+        else:
+            print(pushdown_automaton.output(), file=f_output)
 
 
 if __name__ == "__main__":

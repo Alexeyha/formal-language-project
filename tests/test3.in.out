@@ -1,6 +1,6 @@
 States: q0 
-Input alphabet: end_y, end_h, h, x, y
-Stack alphabet: S, Y, H, X
+Input alphabet: y, end_h, x, h, end_y
+Stack alphabet: Y, S, H, X
 Start state: q0
 Start stack element: S
 Rules: {
